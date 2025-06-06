@@ -1,0 +1,18 @@
+[project]
+name = "dedupe"
+version = "1.0.0"
+description = "Utility for comparing files based on MD5 or SHA1 hashes"
+authors = [{ name = "Jesse Almanrode", email = "jesse@almanrode.com" }]
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+dependencies = [
+    "click>=8.1.8",
+]
+
+[project.scripts]
+dedupe = "dedupe:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

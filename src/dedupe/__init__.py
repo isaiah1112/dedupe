@@ -3,7 +3,6 @@
 """
 import click
 import hashlib
-import io
 import logging
 import os
 import shutil
