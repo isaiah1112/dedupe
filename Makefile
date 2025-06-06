@@ -5,3 +5,7 @@ install:
 .PHONY: install-dev
 install-dev:
 	@python -m pip install -U -e .
+
+.PHONY: lint
+lint:
+	@uv run --group dev ruff check src/dedupe/
