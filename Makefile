@@ -8,4 +8,4 @@ install-dev:
 
 .PHONY: lint
 lint:
-	@uv run --group dev ruff check src/dedupe/
+	@uv run --group test ruff check src/dedupe/
