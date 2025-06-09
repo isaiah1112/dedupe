@@ -3,7 +3,6 @@
 """
 import click
 import hashlib
-import io
 import logging
 import os
 import shutil
@@ -64,7 +63,7 @@ dedupe.py --remove ~/Pictures/Wallpapers
 """)
 @click.version_option()
 @click.option('--debug', '-d', is_flag=True, help='Enable debugging')
-@click.option('--remove', is_flag=True, help='Remove duplicate files')
+@click.option('--remove', '-rm', is_flag=True, help='Remove duplicate files')
 @click.option('--sha1', '-S', is_flag=True, help='Use sha1 algorithum for comparing files')
 @click.argument('folder', nargs=1, type=click.Path(exists=True, file_okay=False, writable=True))
 def cli(**kwargs):
