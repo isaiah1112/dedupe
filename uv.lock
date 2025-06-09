@@ -55,7 +55,7 @@ dependencies = [
 ]
 
 [package.dev-dependencies]
-dev = [
+test = [
     { name = "ruff" },
 ]
 
@@ -63,7 +63,7 @@ dev = [
 requires-dist = [{ name = "click", specifier = ">=8.1.8" }]
 
 [package.metadata.requires-dev]
-dev = [{ name = "ruff", specifier = ">=0.11.13" }]
+test = [{ name = "ruff", specifier = ">=0.11.13" }]
 
 [[package]]
 name = "ruff"
