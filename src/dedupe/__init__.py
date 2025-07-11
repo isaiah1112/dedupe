@@ -1,13 +1,13 @@
-# coding=utf-8
 """ Python script for de-duplicating files based on md5 hash
 """
-import click
 import hashlib
 import logging
 import os
 import shutil
 import sys
-from collections import namedtuple, defaultdict
+from collections import defaultdict, namedtuple
+
+import click
 
 FileSpec = namedtuple('FileSpec', ['path', 'name', 'hash'])
 
@@ -78,20 +78,17 @@ def cli(**kwargs):
     log.debug(kwargs)
 
     if not kwargs['folder'].endswith('/'):
-        log.info('Appending / to path %s' % (kwargs['folder'],))
+        log.info('Appending / to path {}'.format(kwargs['folder']))
         kwargs['folder'] = kwargs['folder'] + '/'
 
     files = os.listdir(kwargs['folder'])
     hashed_files = list()
     hashes = list()
-    with click.progressbar(files, label='Building hashes of %s files' % (len(files),)) as bar:
+    with click.progressbar(files, label=f'Building hashes of {len(files)} files') as bar:
         for file in bar:
             f_path = kwargs['folder'] + file
             if not file.startswith('.') and not os.path.isdir(f_path):
-                if kwargs['sha1']:
-                    f_hash = sha1_hash(f_path)
-                else:
-                    f_hash = md5_file(f_path)
+                f_hash = sha1_hash(f_path) if kwargs['sha1'] else md5_file(f_path)
                 f = FileSpec(path=f_path, name=file, hash=f_hash)
                 hashed_files.append(f)
                 hashes.append(f.hash)
@@ -113,7 +110,7 @@ def cli(**kwargs):
                 click.echo('-' * 16)
                 click.echo('\n'.join([x.name for x in files]))
 
-        for hash, files in duplicates.items():
+        for _, files in duplicates.items():
             for idx, file in enumerate(files):
                 if idx > 0:
                     if kwargs['remove']:
