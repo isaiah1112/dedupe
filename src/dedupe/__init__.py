@@ -1,4 +1,4 @@
-""" Python script for de-duplicating files based on md5 hash
+""" Python script for de-duplicating files based on different hash types
 """
 import hashlib
 import logging
@@ -64,7 +64,7 @@ dedupe.py --remove ~/Pictures/Wallpapers
 @click.version_option()
 @click.option('--debug', '-d', is_flag=True, help='Enable debugging')
 @click.option('--remove', '-rm', is_flag=True, help='Remove duplicate files')
-@click.option('--sha1', '-S', is_flag=True, help='Use sha1 algorithum for comparing files')
+@click.option('--hash', default='md5', type=click.Choice(['sha1', 'md5']), help='Hash algorithm for comparing files')
 @click.argument('folder', nargs=1, type=click.Path(exists=True, file_okay=False, writable=True))
 def cli(**kwargs):
     """ Utility for finding duplicate files based on md5 hashes.
@@ -88,7 +88,10 @@ def cli(**kwargs):
         for file in bar:
             f_path = kwargs['folder'] + file
             if not file.startswith('.') and not os.path.isdir(f_path):
-                f_hash = sha1_hash(f_path) if kwargs['sha1'] else md5_file(f_path)
+                if kwargs['hash'] == 'md5':
+                    f_hash = md5_file(f_path)
+                elif kwargs['hash'] == 'sha1':
+                    f_hash = sha1_hash(f_path)
                 f = FileSpec(path=f_path, name=file, hash=f_hash)
                 hashed_files.append(f)
                 hashes.append(f.hash)
