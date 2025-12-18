@@ -84,7 +84,7 @@ def cli(**kwargs):
     files = os.listdir(kwargs['folder'])
     hashed_files = list()
     hashes = list()
-    with click.progressbar(files, label=f'Building hashes of {len(files)} files') as bar:
+    with click.progressbar(files, label=f'Building hashes of {len(files)} files', hidden=kwargs['debug']) as bar:
         for file in bar:
             f_path = kwargs['folder'] + file
             if not file.startswith('.') and not os.path.isdir(f_path):
@@ -93,6 +93,7 @@ def cli(**kwargs):
                 elif kwargs['hash'] == 'sha1':
                     f_hash = sha1_hash(f_path)
                 f = FileSpec(path=f_path, name=file, hash=f_hash)
+                log.debug(f)
                 hashed_files.append(f)
                 hashes.append(f.hash)
 
@@ -100,7 +101,7 @@ def cli(**kwargs):
     if len(dupe_hashes) == 0:
         click.echo('No duplicate files found')
     else:
-        print("Found " + str(len(dupe_hashes)) + " duplicate file(s)!")
+        click.echo("Found " + str(len(dupe_hashes)) + " duplicate file(s)!")
         duplicates = defaultdict(list)
         for f in hashed_files:
             if f.hash in dupe_hashes:
@@ -108,10 +109,7 @@ def cli(**kwargs):
 
         if kwargs['debug']:
             for hash, files in duplicates.items():
-                click.echo('-' * 16)
-                click.echo(hash)
-                click.echo('-' * 16)
-                click.echo('\n'.join([x.name for x in files]))
+                log.debug({'hash': hash, 'files': [x.name for x in files]})
 
         for _, files in duplicates.items():
             for idx, file in enumerate(files):
@@ -123,11 +121,11 @@ def cli(**kwargs):
                             os.mkdir(kwargs['folder'] + 'duplicates/')
                         shutil.move(file.path, kwargs['folder'] + 'duplicates/' + file.name)
         if kwargs['remove']:
-            print("Duplicate files removed!")
+            click.echo("Duplicate files removed!")
         else:
-            print("Duplicate files moved to: " + kwargs['folder'] + 'duplicates/')
+            click.echo("Duplicate files moved to: " + kwargs['folder'] + 'duplicates/')
     sys.exit(0)
 
 if __name__ == "__main__":
-    print('Please install the dedupe command using "pip install -u ."')
+    click.echo('Please install the dedupe command using "pip install -u ."')
     sys.exit(1)
