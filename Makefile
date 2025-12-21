@@ -24,7 +24,7 @@ install:
 
 .PHONY: lint
 lint: uv-init
-	@uv run --group test ruff check src/dedupe/
+	@uv run --group test ruff check src/
 
 .PHONY: test
 test: uv-init

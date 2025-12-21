@@ -26,7 +26,7 @@ jobs:
         pip install uv
     - name: Lint with ruff
       run: |
-        uv run --group test ruff check picklejar.py
+        uv run --group test ruff check src/
     - name: Run Tests
       run: |
         uv run --group test pytest
