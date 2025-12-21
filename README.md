@@ -1,4 +1,7 @@
 # Dedupe Utility
+
+[![Python Tests](https://github.com/isaiah1112/dedupe/actions/workflows/python-tests.yml/badge.svg)](https://github.com/isaiah1112/dedupe/actions/workflows/python-tests.yml)
+
 The `dedupe` utility was written in Python to help compare a directory of files, originally just image files,
 and determine the duplicates based on an MD5 hash of the file.  SHA1 hashing was later added because, well, it just was.
 

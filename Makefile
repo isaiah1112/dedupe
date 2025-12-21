@@ -7,6 +7,7 @@ help:
 	@echo "\nTargets:"
 	@echo "  install [UV_INSTALL]    Install project"
 	@echo "  lint    Run 'ruff' linting on project"
+	@echo "  test    Run 'pytest' on project"
 
 # Install UV if it is not installed
 .PHONY: uv-init
@@ -24,3 +25,7 @@ install:
 .PHONY: lint
 lint: uv-init
 	@uv run --group test ruff check src/dedupe/
+
+.PHONY: test
+test: uv-init
+	@uv run --group test pytest
