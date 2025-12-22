@@ -27,8 +27,8 @@ install:
 lint: uv-init
 	@uv run --group test ruff check src/
 
-.PHONY: lint
-lint: uv-init
+.PHONY: type
+type: uv-init
 	@uv run --group test ty check src/
 
 .PHONY: test
