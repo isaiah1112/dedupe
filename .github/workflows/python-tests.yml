@@ -22,11 +22,13 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install UV
-      run: |
-        pip install uv
+      uses: astral-sh/setup-uv@v7
     - name: Lint with ruff
       run: |
         uv run --group test ruff check src/
+    - name: Type Checking with ty
+      run: |
+        uv run --group test ty check src/
     - name: Run Tests
       run: |
         uv run --group test pytest

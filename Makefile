@@ -7,6 +7,7 @@ help:
 	@echo "\nTargets:"
 	@echo "  install [UV_INSTALL]    Install project"
 	@echo "  lint    Run 'ruff' linting on project"
+	@echo "  type    Run 'uv' type-checking on project"
 	@echo "  test    Run 'pytest' on project"
 
 # Install UV if it is not installed
@@ -25,6 +26,10 @@ install:
 .PHONY: lint
 lint: uv-init
 	@uv run --group test ruff check src/
+
+.PHONY: lint
+lint: uv-init
+	@uv run --group test ty check src/
 
 .PHONY: test
 test: uv-init
