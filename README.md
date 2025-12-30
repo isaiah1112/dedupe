@@ -1,4 +1,4 @@
-# Dedupe Utility
+![dedupe](logo.png)
 
 [![Python Tests](https://github.com/isaiah1112/dedupe/actions/workflows/python-tests.yml/badge.svg)](https://github.com/isaiah1112/dedupe/actions/workflows/python-tests.yml)
 
@@ -34,7 +34,7 @@ No duplicate files found
 or
 ```
 Found 1 duplicate file(s)!
-Duplicate files moved to: /Users/you/Pictures/Wallpapers/duplicates/
+Duplicate files moved to: ~/Wallpapers/duplicates/
 ```
 
 ### Use a different hash algorithm (sha1, sha256, blake3)
