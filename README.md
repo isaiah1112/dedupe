@@ -1,4 +1,4 @@
-# Dedupe Utility
+![dedupe](logo.png)
 
 [![Python Tests](https://github.com/isaiah1112/dedupe/actions/workflows/python-tests.yml/badge.svg)](https://github.com/isaiah1112/dedupe/actions/workflows/python-tests.yml)
 
