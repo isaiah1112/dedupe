@@ -63,8 +63,6 @@ dedupe.py --remove ~/Pictures/Wallpapers
 @click.argument('folder', nargs=1, type=click.Path(exists=True, file_okay=False, writable=True))
 def cli(**kwargs):
     """ Utility for finding duplicate files based on different hashing algorithms.
-
-    Available algorithms are: md5, sha1, sha256, blake3
     """
     global log
     if kwargs['debug']:
