@@ -1,13 +1,15 @@
-# coding=utf-8
-""" Python script for de-duplicating files based on md5 hash
+""" Python script for de-duplicating files based on different hash types
 """
-import click
 import hashlib
+import io
 import logging
 import os
 import shutil
 import sys
-from collections import namedtuple, defaultdict
+from collections import defaultdict, namedtuple
+
+import click
+from blake3 import blake3
 
 FileSpec = namedtuple('FileSpec', ['path', 'name', 'hash'])
 
@@ -19,41 +21,34 @@ log.setLevel(logging.WARNING)
 log.propagate = False  # Keeps our messages out of the root logger.
 
 
-def sha1_hash(file: str, buffer_size: int = 81920) -> str:
-    """ Create an sha1 hash of a file
+def hash_file(file: str, buffer_size: int = io.DEFAULT_BUFFER_SIZE, algorithm: str = 'md5') -> str:
+    """
+    Hash a file using one of the following algorythms: [md5, sha1, sha256, blake3]
 
     :param file: Path to file to hash
-    :type file: str, required
-    :param buffer_size: Number of bytes to read from file at a time (default: 81920)
+    :type file: str
+    :param buffer_size: Set a buffer size to read from the file, defaults to io.DEFAULT_BUFFER_SIZE
     :type buffer_size: int, optional
-    :return: SHA1 hex hash
+    :param algorithm: Hash algorithm to use, defaults to 'md5'
+    :type algorithm: str, optional
+    :return: Hash of file
     :rtype: str
     """
-    sha1 = hashlib.sha1()
-    with open(file, 'rb') as f:
+    assert algorithm.lower() in ('md5', 'sha1', 'sha256', 'blake3')
+    if algorithm.lower() == 'md5':
+        file_hash = hashlib.md5()
+    elif algorithm.lower() == 'sha1':
+        file_hash = hashlib.sha1()
+    elif algorithm.lower() == 'sha256':
+        file_hash = hashlib.sha256()
+    else:
+        file_hash = blake3()
+    with open(file, mode='rb') as f:
         buf = f.read(buffer_size)
         while len(buf) > 0:
-            sha1.update(buf)
+            file_hash.update(buf)
             buf = f.read(buffer_size)
-    return sha1.hexdigest()
-
-def md5_file(file: str, buffer_size: int = 65536) -> str:
-    """ Create an md5 hash of a file
-
-    :param file: Path to file to hash
-    :type file: str, required
-    :param buffer_size: Number of bytes to read from file at a time (default: 65536)
-    :type buffer_size: int, optional
-    :return: MD5 hex hash
-    :rtype: str
-    """
-    md5 = hashlib.md5()
-    with open(file, 'rb') as f:
-        buf = f.read(buffer_size)
-        while len(buf) > 0:
-            md5.update(buf)
-            buf = f.read(buffer_size)
-    return md5.hexdigest()
+    return file_hash.hexdigest()
 
 
 @click.command(epilog="""\b
@@ -64,13 +59,10 @@ dedupe.py --remove ~/Pictures/Wallpapers
 @click.version_option()
 @click.option('--debug', '-d', is_flag=True, help='Enable debugging')
 @click.option('--remove', '-rm', is_flag=True, help='Remove duplicate files')
-@click.option('--sha1', '-S', is_flag=True, help='Use sha1 algorithum for comparing files')
+@click.option('--hash', default='md5', type=click.Choice(['sha1', 'md5', 'sha256', 'blake3']), help='Hash algorithm for comparing files')
 @click.argument('folder', nargs=1, type=click.Path(exists=True, file_okay=False, writable=True))
 def cli(**kwargs):
-    """ Utility for finding duplicate files based on md5 hashes.
-
-    You can also use sha1 hashes to compare files if you wish by using the `--sha1`
-    flag.
+    """ Utility for finding duplicate files based on different hashing algorithms.
     """
     global log
     if kwargs['debug']:
@@ -78,21 +70,19 @@ def cli(**kwargs):
     log.debug(kwargs)
 
     if not kwargs['folder'].endswith('/'):
-        log.info('Appending / to path %s' % (kwargs['folder'],))
+        log.info('Appending / to path {}'.format(kwargs['folder']))
         kwargs['folder'] = kwargs['folder'] + '/'
 
     files = os.listdir(kwargs['folder'])
     hashed_files = list()
     hashes = list()
-    with click.progressbar(files, label='Building hashes of %s files' % (len(files),)) as bar:
+    with click.progressbar(files, label=f'Building hashes of {len(files)} files', hidden=kwargs['debug']) as bar:
         for file in bar:
             f_path = kwargs['folder'] + file
             if not file.startswith('.') and not os.path.isdir(f_path):
-                if kwargs['sha1']:
-                    f_hash = sha1_hash(f_path)
-                else:
-                    f_hash = md5_file(f_path)
+                f_hash = hash_file(f_path, algorithm=kwargs['hash'])
                 f = FileSpec(path=f_path, name=file, hash=f_hash)
+                log.debug(f)
                 hashed_files.append(f)
                 hashes.append(f.hash)
 
@@ -100,7 +90,7 @@ def cli(**kwargs):
     if len(dupe_hashes) == 0:
         click.echo('No duplicate files found')
     else:
-        print("Found " + str(len(dupe_hashes)) + " duplicate file(s)!")
+        click.echo("Found " + str(len(dupe_hashes)) + " duplicate file(s)!")
         duplicates = defaultdict(list)
         for f in hashed_files:
             if f.hash in dupe_hashes:
@@ -108,12 +98,9 @@ def cli(**kwargs):
 
         if kwargs['debug']:
             for hash, files in duplicates.items():
-                click.echo('-' * 16)
-                click.echo(hash)
-                click.echo('-' * 16)
-                click.echo('\n'.join([x.name for x in files]))
+                log.debug({'hash': hash, 'files': [x.name for x in files]})
 
-        for hash, files in duplicates.items():
+        for _, files in duplicates.items():
             for idx, file in enumerate(files):
                 if idx > 0:
                     if kwargs['remove']:
@@ -123,11 +110,11 @@ def cli(**kwargs):
                             os.mkdir(kwargs['folder'] + 'duplicates/')
                         shutil.move(file.path, kwargs['folder'] + 'duplicates/' + file.name)
         if kwargs['remove']:
-            print("Duplicate files removed!")
+            click.echo("Duplicate files removed!")
         else:
-            print("Duplicate files moved to: " + kwargs['folder'] + 'duplicates/')
+            click.echo("Duplicate files moved to: " + kwargs['folder'] + 'duplicates/')
     sys.exit(0)
 
 if __name__ == "__main__":
-    print('Please install the dedupe command using "pip install -u ."')
+    click.echo('Please install the dedupe command using "pip install -u ."')
     sys.exit(1)
