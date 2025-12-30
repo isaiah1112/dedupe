@@ -1,14 +1,24 @@
+import hashlib
+
+from blake3 import blake3
 from click.testing import CliRunner
 
-from dedupe import cli, md5_file, sha1_hash
+from dedupe import cli, hash_file
 
 
-def test_md5_and_sha1(tmp_path):
+def test_hashes(tmp_path):
     p = tmp_path / "hello.txt"
     p.write_text("hello world")
 
-    assert md5_file(str(p)) == "5eb63bbbe01eeed093cb22bb8f5acdc3"
-    assert sha1_hash(str(p)) == "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"
+    assert hash_file(str(p), algorithm='md5') == hashlib.md5(b"hello world").hexdigest()
+    assert hash_file(str(p), algorithm='sha1') == hashlib.sha1(b"hello world").hexdigest()
+
+    # new: verify sha256 and blake3
+    assert hash_file(str(p), algorithm='sha256') == hashlib.sha256(b"hello world").hexdigest()
+
+    h = blake3()
+    h.update(b"hello world")
+    assert hash_file(str(p), algorithm='blake3') == h.hexdigest()
 
 
 def test_cli_no_duplicates(tmp_path):
@@ -78,6 +88,19 @@ def test_cli_sha1_option(tmp_path):
 
     runner = CliRunner()
     result = runner.invoke(cli, ["--debug", "--hash", "sha1", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "Found 1 duplicate file(s)!" in result.output
+
+
+def test_cli_blake3_option(tmp_path):
+    f1 = tmp_path / "a1.txt"
+    f2 = tmp_path / "a2.txt"
+    f1.write_text("same")
+    f2.write_text("same")
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["--debug", "--hash", "blake3", str(tmp_path)])
 
     assert result.exit_code == 0
     assert "Found 1 duplicate file(s)!" in result.output
