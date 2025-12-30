@@ -1,10 +1,10 @@
 [project]
 name = "dedupe"
-version = "1.1.0"
-description = "Utility for comparing files based on MD5 or SHA1 hashes"
+version = "2.0.0"
+description = "Utility for comparing files based on various hashing algorithms"
 authors = [{ name = "Jesse Almanrode", email = "jesse@almanrode.com" }]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10,<4.0"
 license = "MIT"
 dependencies = [
     "blake3>=1.0.8",
