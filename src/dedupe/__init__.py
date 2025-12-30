@@ -1,6 +1,7 @@
 """ Python script for de-duplicating files based on different hash types
 """
 import hashlib
+import io
 import logging
 import os
 import shutil
@@ -19,12 +20,12 @@ log.setLevel(logging.WARNING)
 log.propagate = False  # Keeps our messages out of the root logger.
 
 
-def sha1_hash(file: str, buffer_size: int = 81920) -> str:
+def sha1_hash(file: str, buffer_size: int = io.DEFAULT_BUFFER_SIZE) -> str:
     """ Create an sha1 hash of a file
 
     :param file: Path to file to hash
     :type file: str, required
-    :param buffer_size: Number of bytes to read from file at a time (default: 81920)
+    :param buffer_size: Number of bytes to read from file at a time (default: io.DEFAULT_BUFFER_SIZE)
     :type buffer_size: int, optional
     :return: SHA1 hex hash
     :rtype: str
@@ -37,12 +38,12 @@ def sha1_hash(file: str, buffer_size: int = 81920) -> str:
             buf = f.read(buffer_size)
     return sha1.hexdigest()
 
-def md5_file(file: str, buffer_size: int = 65536) -> str:
+def md5_file(file: str, buffer_size: int = io.DEFAULT_BUFFER_SIZE) -> str:
     """ Create an md5 hash of a file
 
     :param file: Path to file to hash
     :type file: str, required
-    :param buffer_size: Number of bytes to read from file at a time (default: 65536)
+    :param buffer_size: Number of bytes to read from file at a time (default: io.DEFAULT_BUFFER_SIZE)
     :type buffer_size: int, optional
     :return: MD5 hex hash
     :rtype: str
