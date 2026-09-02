@@ -1,11 +1,14 @@
 version: 2
-updates:
-  - package-ecosystem: "uv"
-    directory: "/"
+multi-ecosystem-groups:
+  weekly:
     schedule:
       interval: "weekly"
 
+updates:
+  - package-ecosystem: "uv"
+    directory: "/"
+    multi-ecosystem-group: "weekly"
+
   - package-ecosystem: "github-actions"
     directory: "/"
-    schedule:
-      interval: "weekly"
+    multi-ecosystem-group: "weekly"
