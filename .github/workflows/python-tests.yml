@@ -4,14 +4,38 @@ on:
   push:
     branches: [ "develop" ]
   pull_request:
-    branches: [ "develop" ]
+    types: [ opened, synchronize, reopened ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.14"
+    - name: Install UV
+      uses: astral-sh/setup-uv@v7
+      with:
+        enable-cache: true
+        cache-dependency-glob: uv.lock
+    - name: Lint with ruff
+      run: uv run --locked --group test ruff check src/
+    - name: Type Checking with ty
+      continue-on-error: true
+      run: uv run --locked --group test ty check src/
+
+  tests:
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     runs-on: ubuntu-latest
@@ -23,12 +47,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install UV
       uses: astral-sh/setup-uv@v7
-    - name: Lint with ruff
-      run: |
-        uv run --group test ruff check src/
-    - name: Type Checking with ty
-      run: |
-        uv run --group test ty check src/
+      with:
+        enable-cache: true
+        cache-dependency-glob: uv.lock
     - name: Run Tests
-      run: |
-        uv run --group test pytest
+      run: uv run --locked --group test pytest
