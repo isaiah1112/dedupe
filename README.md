@@ -2,23 +2,28 @@
 
 [![Python Tests](https://github.com/isaiah1112/dedupe/actions/workflows/python-tests.yml/badge.svg)](https://github.com/isaiah1112/dedupe/actions/workflows/python-tests.yml)
 
-The `dedupe` utility was written in Python to help compare a directory of files, originally just image files,
-and determine the duplicates based on different hashing algorithms.
+The `dedupe` utility compares files in a directory and identifies duplicates using different hashing algorithms.
 
 ## Getting Started
-To install or update `dedupe`, the `make` command:
+Python 3.10 or newer is required. The Makefile uses `uv` by default and installs it automatically when needed.
 
 ### Using make
 ```commandline
 make install
 ```
 
-If you do not want to use `uv` to install `dedupe`:
+This creates or updates the project virtual environment in `.venv`. Activate it with:
+
+```commandline
+source .venv/bin/activate
+```
+
+To install with pip instead of uv:
 ```commandline
 make install UV_INSTALL=0
 ```
 
-## Usage Examples ✅
+## Usage
 
 After installation, the `dedupe` command will be available in your environment.
 
@@ -34,7 +39,7 @@ No duplicate files found
 or
 ```
 Found 1 duplicate file(s)!
-Duplicate files moved to: ~/Wallpapers/duplicates/
+Duplicate files moved to: ~/Pictures/Wallpapers/duplicates/
 ```
 
 ### Use a different hash algorithm (sha1, sha256, blake3)
@@ -68,3 +73,24 @@ Duplicate files removed!
 dedupe --debug ~/SomeFolder
 ```
 This enables additional logging for troubleshooting.
+
+## Development
+
+Install the project and its test tools, then run the checks with:
+
+```commandline
+make lint
+make test
+```
+
+To run tests in Docker for a specific Python version:
+
+```commandline
+make docker-test PYTHON_VERSION=3.14
+```
+
+To run the tests across all supported Python versions:
+
+```commandline
+make docker-test-all
+```
