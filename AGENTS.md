@@ -10,12 +10,12 @@ Key project files:
 - `Makefile` — common setup and validation commands
 
 ## Required environment
-All Python package installation and management must use the repository-local virtual environment at `.venv`.
+Use `uv` as the default package manager. The project-managed environment is `.venv`.
 
 Rules for agents:
-- Do not install packages with system `python`, `pip`, or `pip3`.
-- Do not use global interpreter state for this repo.
-- Always prefer the project virtual environment located at `.venv`.
+- Do not install packages into global Python environments.
+- Prefer the Makefile targets for setup and validation.
+- Use the repository-local virtual environment at `.venv` for direct Python commands.
 - Use commands such as:
   - `.venv/bin/python`
   - `.venv/bin/pip`
@@ -26,62 +26,55 @@ Rules for agents:
   - `source .venv/bin/activate`
 
 ## Setup
-Use the project-managed setup flow from the repo root:
+From the repository root, use the project-managed setup flow:
 
 ```bash
 make install
 ```
 
-This repo expects uv-managed dependency resolution and creates or uses `.venv` under the project root. If the environment is missing, initialize it before other Python work:
+This installs uv if needed and runs `uv sync --locked`, creating or updating `.venv` from `uv.lock`. Activate it when direct environment commands are needed:
+
+source .venv/bin/activate
+
+The Makefile’s `lint` and `test` targets use uv and install the test dependency group on demand:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -e .
+make lint
+make test
 ```
 
-If you need dev/test dependencies:
+For the explicit pip fallback:
 
 ```bash
-source .venv/bin/activate
-python -m pip install -e '.[test]'
+make install UV_INSTALL=0
 ```
 
-Or, when working with the project’s preferred tooling:
+Docker-based tests are available for one or all supported Python versions:
 
 ```bash
-make install
+make docker-test PYTHON_VERSION=3.14
+make docker-test-all
 ```
 
 ## Testing and validation
-Run checks with the project environment, not the system interpreter:
+Prefer the Makefile targets:
 
 ```bash
-source .venv/bin/activate
-pytest
+make lint
+make test
 ```
 
-Or directly from the venv:
+Equivalent direct uv commands are:
 
 ```bash
-.venv/bin/python -m pytest
+uv run --locked --group test ruff check src/
+uv run --locked --group test ty check src/
+uv run --locked --group test pytest
 ```
 
-Project lint/type-check commands:
+The GitHub Actions workflow runs linting and type checking once, then runs tests across Python 3.10 through 3.14. `ty` is informational in CI, while Ruff and tests remain required.
 
-```bash
-source .venv/bin/activate
-ruff check src/
-ty check src/
-```
-
-Equivalent direct venv invocations:
-
-```bash
-.venv/bin/ruff check src/
-.venv/bin/ty check src/
-```
+Dependabot checks the uv lockfile and GitHub Actions dependencies weekly.
 
 ## Agent expectations
 - Prefer working inside the repo root and using `.venv` for all Python commands.
