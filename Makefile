@@ -1,39 +1,49 @@
-PYTHON_VERSION := "3.14" # Default Python Version
-UV_PATH := $(shell which uv 2>/dev/null)
-UV_INSTALL := 1
+PYTHON_VERSION ?= 3.14
+UV_INSTALL ?= 1
+UV := $(or $(shell command -v uv 2>/dev/null),$(HOME)/.local/bin/uv)
+
+.DEFAULT_GOAL := help
 
 .PHONY: help
 help:
-	@echo "Usage: make <target> [option]"
-	@echo "\nTargets:"
-	@echo "  install [UV_INSTALL=1]    Install project"
-	@echo "  lint    Run 'ruff' linting and 'ty' type-checking on project"
-	@echo "  test    Run 'pytest' on project"
-	@echo "  docker-test [PYTHON_VERSION=X.X]   Run unit tests in Docker container"
-	@echo "\nSpecial Targets:"
-	@echo "  docker-test-all    Run unit tests, in Docker, across all versions of Python"
+	@printf '%s\n' \
+		'Usage: make <target> [option]' \
+		'' \
+		'Targets:' \
+		'  install [UV_INSTALL=1]             Install the project with uv' \
+		'  lint                                Run ruff and ty checks' \
+		'  test                                Run pytest' \
+		'  docker-test [PYTHON_VERSION=X.X]   Run tests in a Docker container' \
+		'  docker-test-all                    Run Docker tests across Python versions'
 
 # Install UV if it is not installed
 .PHONY: uv-init
-init:
-	@if [ -z "$(UV_PATH)" ]; then curl -LsSf https://astral.sh/uv/install.sh | sh; fi
+uv-init:
+	@if command -v uv >/dev/null 2>&1; then \
+		exit 0; \
+	fi; \
+	echo 'Installing uv...'; \
+	curl --fail --location --silent --show-error https://astral.sh/uv/install.sh | sh; \
+	test -x "$(UV)"
 
 .PHONY: install
 install:
-	@if [ $(UV_INSTALL) -eq 1 ]; then\
-		$(MAKE) uv-init && uv sync && echo "Please run the following to activate the virtualenv:\n source .venv/bin/activate";\
-	else\
-		python -m pip install -U .;\
-	fi
+ifeq ($(UV_INSTALL),1)
+	@$(MAKE) uv-init
+	@$(UV) sync --locked
+	@printf '%s\n' 'Run: source .venv/bin/activate'
+else
+	@python -m pip install --upgrade .
+endif
 
 .PHONY: lint
 lint: uv-init
-	@uv run --group test ruff check src/
-	@uv run --group test ty check src/
+	@$(UV) run --locked --group test ruff check src/
+	@$(UV) run --locked --group test ty check src/
 
 .PHONY: test
 test: uv-init
-	@uv run --group test pytest
+	@$(UV) run --locked --group test pytest
 
 .PHONY: docker-test-all
 docker-test-all:
@@ -47,5 +57,5 @@ docker-test-all:
 .PHONY: docker-test
 docker-test:
 	@echo "Testing Python:$(PYTHON_VERSION)"
-	@docker run -it --rm -v "$(PWD)":/usr/src/app -w /usr/src/app python:$(PYTHON_VERSION)\
-		sh -c 'python -m pip install --root-user-action=ignore uv && uv run --link-mode=copy --group test pytest'
+	@docker run --rm -v "$(PWD)":/usr/src/app -w /usr/src/app python:$(PYTHON_VERSION) \
+		sh -c 'python -m pip install --root-user-action=ignore uv && uv run --locked --link-mode=copy --group test pytest'
