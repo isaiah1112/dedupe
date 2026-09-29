@@ -22,7 +22,7 @@ build-backend = "hatchling.build"
 test = [
     "pytest>=9.1.1",
     "ruff>=0.16.8",
-    "ty>=0.0.78",
+    "ty>=0.0.83",
 ]
 
 [tool.ruff.lint]
