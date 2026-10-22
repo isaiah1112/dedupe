@@ -37,7 +37,7 @@ def test_hash_file_rejects_unknown_algorithm(tmp_path):
     p = tmp_path / 'hello.txt'
     p.write_text('hello world')
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError, match='Unsupported hash algorithm: sha512'):
         hash_file(str(p), algorithm='sha512')
 
 
