@@ -13,6 +13,7 @@ help:
 		'  install [UV_INSTALL=1]             Install the project with uv' \
 		'  lint                                Run ruff and ty checks' \
 		'  test                                Run pytest' \
+		'  coverage                            Run pytest with coverage reporting' \
 		'  docker-test [PYTHON_VERSION=X.X]   Run tests in a Docker container' \
 		'  docker-test-all                    Run Docker tests across Python versions'
 
@@ -44,6 +45,10 @@ lint: uv-init
 .PHONY: test
 test: uv-init
 	@$(UV) run --locked --group test pytest
+
+.PHONY: coverage
+coverage: uv-init
+	@$(UV) run --locked --group test pytest --cov=dedupe --cov-report=term-missing
 
 .PHONY: docker-test-all
 docker-test-all:

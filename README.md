@@ -85,6 +85,12 @@ make lint
 make test
 ```
 
+To run the unit tests and print a coverage report with missing lines:
+
+```commandline
+make coverage
+```
+
 To run tests in Docker for a specific Python version:
 
 ```commandline
