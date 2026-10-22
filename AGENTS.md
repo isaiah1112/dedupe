@@ -52,7 +52,7 @@ make install UV_INSTALL=0
 Docker-based tests are available for one or all supported Python versions:
 
 ```bash
-make docker-test PYTHON_VERSION=3.14
+make docker-test PYTHON_VERSION=3.15
 make docker-test-all
 ```
 
@@ -72,7 +72,7 @@ uv run --locked --group test ty check src/
 uv run --locked --group test pytest
 ```
 
-The GitHub Actions workflow runs linting and type checking once, then runs tests across Python 3.10 through 3.14. `ty` is informational in CI, while Ruff and tests remain required.
+The GitHub Actions workflow runs linting and type checking once, then runs tests across Python 3.11 through 3.15. `ty` is informational in CI, while Ruff and tests remain required.
 
 Dependabot checks the uv lockfile and GitHub Actions dependencies weekly.
 

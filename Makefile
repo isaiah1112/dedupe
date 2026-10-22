@@ -1,4 +1,4 @@
-PYTHON_VERSION ?= 3.14
+PYTHON_VERSION ?= 3.15
 UV_INSTALL ?= 1
 UV := $(or $(shell command -v uv 2>/dev/null),$(HOME)/.local/bin/uv)
 
@@ -47,11 +47,11 @@ test: uv-init
 
 .PHONY: docker-test-all
 docker-test-all:
-	@$(MAKE) docker-test PYTHON_VERSION=3.10
 	@$(MAKE) docker-test PYTHON_VERSION=3.11
 	@$(MAKE) docker-test PYTHON_VERSION=3.12
 	@$(MAKE) docker-test PYTHON_VERSION=3.13
 	@$(MAKE) docker-test PYTHON_VERSION=3.14
+	@$(MAKE) docker-test PYTHON_VERSION=3.15
 
 # Private target for docker-tests
 .PHONY: docker-test

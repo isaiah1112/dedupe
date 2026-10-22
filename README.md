@@ -5,7 +5,7 @@
 The `dedupe` utility compares files in a directory and identifies duplicates using different hashing algorithms.
 
 ## Getting Started
-Python 3.10 or newer is required. The Makefile uses `uv` by default and installs it automatically when needed.
+Python 3.11 or newer is required. The Makefile uses `uv` by default and installs it automatically when needed.
 
 ### Using make
 ```commandline
@@ -86,7 +86,7 @@ make test
 To run tests in Docker for a specific Python version:
 
 ```commandline
-make docker-test PYTHON_VERSION=3.14
+make docker-test PYTHON_VERSION=3.15
 ```
 
 To run the tests across all supported Python versions:
