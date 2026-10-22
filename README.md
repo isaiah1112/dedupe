@@ -2,7 +2,7 @@
 
 [![Python Tests](https://github.com/isaiah1112/dedupe/actions/workflows/python-tests.yml/badge.svg)](https://github.com/isaiah1112/dedupe/actions/workflows/python-tests.yml)
 
-The `dedupe` utility compares files in a directory and identifies duplicates using different hashing algorithms.
+`dedupe` finds duplicate files in a directory by comparing their hashes. It checks files directly inside the selected directory (not recursively) and skips hidden files and subdirectories.
 
 ## Getting Started
 Python 3.11 or newer is required. The Makefile uses `uv` by default and installs it automatically when needed.
@@ -27,52 +27,54 @@ make install UV_INSTALL=0
 
 After installation, the `dedupe` command will be available in your environment.
 
-### Find duplicates (default: md5)
+### Find duplicates
+
+By default, `dedupe` uses MD5 and moves all but one file from each duplicate group into a `duplicates/` subdirectory inside the selected folder:
+
 ```commandline
-# Scan a folder and report duplicates (default algorithm: md5)
 dedupe ~/Pictures/Wallpapers
 ```
-Possible output:
+
+Choose another supported algorithm with `--hash` (`md5`, `sha1`, `sha256`, or `blake3`):
+
+```commandline
+dedupe --hash sha1 ~/Documents
+dedupe --hash sha256 ~/Videos
+dedupe --hash blake3 ~/Downloads
 ```
-No duplicate files found
-```
-or
+
+When duplicates are found, output looks like:
 ```
 Found 1 duplicate file(s)!
 Duplicate files moved to: ~/Pictures/Wallpapers/duplicates/
 ```
 
-### Use a different hash algorithm (sha1, sha256, blake3)
-```commandline
-# Use SHA-256 for comparisons
-dedupe --hash sha256 ~/Videos
-
-# Use BLAKE3 (fast modern hash)
-dedupe --hash blake3 ~/Videos
+If no duplicates are found, it prints:
 ```
-Possible output when duplicates exist:
-```
-Found 2 duplicate file(s)!
-Duplicate files moved to: ~/Videos/duplicates/
+No duplicate files found
 ```
 
-### Remove duplicates instead of moving them
+### Remove duplicates
+
+Use `--remove` to permanently delete the extra copies instead of moving them. This cannot be undone:
+
 ```commandline
-# Permanently remove duplicate files
-# (use with caution!)
 dedupe --remove ~/MyFolder
 ```
-Possible output:
+
+When duplicates are removed, it prints:
 ```
 Found 1 duplicate file(s)!
 Duplicate files removed!
 ```
 
-### Debug / verbose mode
+### Debug mode
+
+Use `--debug` (or `-d`) to enable diagnostic logging:
+
 ```commandline
 dedupe --debug ~/SomeFolder
 ```
-This enables additional logging for troubleshooting.
 
 ## Development
 
